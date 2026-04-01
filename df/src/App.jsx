@@ -1,70 +1,62 @@
-import { Children } from 'react';
-import './App.css';
-import { useState } from 'react';
-import Tab from './component/TabButton/TabButton.jsx';
-import Timg from './assets/react.svg';
-import { data } from './data.js';
-export function Header() {
-  const [chao, setChao] = useState('xin chao');
-  const [a, setA] = useState(new Date().getHours());
-  console.log(a);
-  return (
-    <>
-      <button
-        onClick={() => {
-          if (a > 12) {
-            setChao('Chao buoi chieu');
-            setA(a - 1);
-          } else {
-            setChao('chao buoi sang');
-            setA(a - 1);
-            if (a == 0) setA(new Date().getHours());
-          }
-          console.log(a);
-        }}
-      >
-        Nhấn vào đây
-      </button>
-      <h1>{chao}</h1>
-      <h3>Bây giờ là {a}</h3>
-    </>
-  );
-}
-function Component({ image, alt, title, des }) {
-  return (
-    <li>
-      <img src={image} alt={alt} />
-      <h2>{title}</h2>
-      <p>{des}</p>
-    </li>
-  );
-}
+import React, { useState, useEffect } from 'react';
+import { dsnhanvien } from './data';
+import Form from './component/Form.jsx';
+import HienThi from './component/Table.jsx';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
-function a() {
-  handleClick('btn0');
-}
 function App() {
-  console.log('App dduowcj goij laij');
-  const [content, setContent] = useState(['Select a button!']);
+  const [nhanviens, setNhanViens] = useState(() => {
+    const lc = localStorage.getItem('staffData');
+    return lc ? JSON.parse(lc) : dsnhanvien;
+  });
+  useEffect(() => {
+    localStorage.setItem('staffData', JSON.stringify(nhanviens));
+  }, [nhanviens]);
+  function add(nvm) {
+    const nvmWithID = { ...nvm, id: Date.now() };
+    setNhanViens([...nhanviens, nvmWithID]);
+  }
+  const handleDelete = (id) => {
+    setNhanViens(nhanviens.filter((nv) => (nv.id == id ? false : true)));
+  };
   return (
     <>
-      <ul>
-        <Component {...data[0]} />
-        <Component {...data[1]} />
-        <Component {...data[2]} />
-      </ul>
-      <Tab
-        handleClick={() => {
-          setContent((a) => [...a, ' me loc']);
-        }}
-      >
-        btn0
-      </Tab>
-      {/* <Tab handleClick={}>btn1</Tab>
-      <Tab handleClick={}>btn2</Tab> */}
-      <p>{content}</p>
+      <div>
+        <div>
+          <h2>
+            <strong>Quản lí nhân sự</strong>
+          </h2>
+
+          <menu>
+            <button>Trang chủ</button>
+            <button>Liên hệ</button>
+          </menu>
+        </div>
+
+        <div>
+          <input type="search"></input>
+          <button>Tìm</button>
+        </div>
+      </div>
+      <Form themNhanVien={add} />
+      <div>
+        <h2>Danh sách nhân sự</h2>
+      </div>
+      <table border={1}>
+        <thead>
+          <tr>
+            <th>STT</th>
+            <th>Họ tên</th>
+            <th>Email</th>
+            <th>Số điện thoại</th>
+            <th>Vị Trí</th>
+            <th colSpan={2}>Hành động</th>
+          </tr>
+        </thead>
+
+        <HienThi nhanviens={nhanviens} onDelete={handleDelete} />
+      </table>
     </>
   );
 }
-
 export default App;
